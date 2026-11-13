@@ -1,0 +1,19 @@
+$ trainer encrypt -f examples/plain-emma.txt --cipher railfence --key 4
+$ trainer solve -f examples/railfence.ciphertext.txt
+
+1. Identify the cipher family
+   Letters: 341   IC: 0.0679   distance of letter frequencies from English (total variation): 0.09
+   Both IC and frequencies look English: the letters are English's own, only reordered -> transposition (rail fence or columnar).
+   Attack order: railfence, columnar
+2. Attack: railfence
+   model score -1.033 per char (English ~ -1.1, random ~ -2.7, accept at -1.45)
+   [Why a transposition] Letter distribution is 0.09 (total-variation) from English: the letters themselves are English's, only their order is scrambled.
+   [Rail fence: try every rail count] Rails 2..12, scoring the decrypt with the language model: |  4 rails ->   -352.4   EMMAWOODHOUSEHANDSOMECLEVERA... |  5 rails ->   -576.6   EEWNOLDAONHTHTENEEFOBEMEORAR... |  6 rails ->   -579.4   EFNWTYHHNOOTYUTAAASAEFNDGHRE... |  9 rails ->   -582.7   EAEWREEVUROMTRDEOEIIROERSYTN...
+   Accepted: railfence.
+3. Conclusion
+   4 rails. Spaces and punctuation are not recoverable from a transposition of letters.
+   Decrypt: EMMAWOODHOUSEHANDSOMECLEVERANDRICHWITHACOMFORTABLEHOMEANDHAPPYDISPOSITIONSEEMEDTOUNITESOMEOFTHEBESTB...
+   Confidence: high (score -1.033)
+
+CIPHER: railfence   KEY: 4   SCORE: -1.033/char   ACCEPTED
+PLAINTEXT: EMMAWOODHOUSEHANDSOMECLEVERANDRICHWITHACOMFORTABLEHOMEANDHAPPYDISPOSITIONSEEMEDTOUNITESOMEOFTHEBESTBLESSINGSOFEXISTENCEANDHADLIVEDNEARLYTWENTYONEYEARSINTHEWORLDWITHVERYLITTLETODISTRESSORVEXHERSHEWASTHEYOUNGESTOFTHETWODAUGHTERSOFAMOSTAFFECTIONATEINDULGENTFATHERANDHADINCONSEQUENCEOFHERSISTERSMARRIAGEBEENMISTRESSOFHISHOUSEFROMAVERYEARLYPERIOD

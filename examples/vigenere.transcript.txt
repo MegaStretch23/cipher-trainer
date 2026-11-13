@@ -1,0 +1,25 @@
+$ trainer encrypt -f examples/plain-oz.txt --cipher vigenere --key CIPHER
+$ trainer solve -f examples/vigenere.ciphertext.txt
+
+1. Identify the cipher family
+   Letters: 315   IC: 0.0437   distance of letter frequencies from English (total variation): 0.37
+   IC is well below English: letter counts are flattened by mixing several alphabets -> polyalphabetic (Vigenere family).
+   Attack order: vigenere
+2. Attack: vigenere
+   model score -1.101 per char (English ~ -1.1, random ~ -2.7, accept at -1.45)
+   [Frequency analysis] 315 letters. Most common ciphertext letters: V:  27 ( 8.6%); P:  20 ( 6.3%); C:  19 ( 6.0%); H:  19 ( 6.0%); Q:  18 ( 5.7%); T:  17 ( 5.4%); I:  17 ( 5.4%); L:  16 ( 5.1%) | English is led by: E 12.7%, T 9.1%, A 8.2%, O 7.5%, I 7.0%, N 6.7%, S 6.3%, H 6.1%
+   [Index of coincidence] IC = 0.0437. English is about 0.0667, uniformly random letters 0.0385. A value between them means several Caesar alphabets are mixed: a polyalphabetic cipher such as Vigenere.
+   [Kasiski examination] 17 repeated 3-letter groups. Distances between repeats: ALV: [48, 102]; IOI: [294]; VPT: [78]; UVP: [164] | Key lengths dividing the most distances: 2 (16), 3 (16), 6 (15), 4 (8), 12 (7)
+   [Friedman estimate] L ~ 0.0273*n / ((n-1)*IC - 0.0385*n + 0.0658) = 5.2
+   [Average column IC per key length] If the key length is right, every column is a Caesar shift and its IC rises toward 0.0667: | L=1:0.044  L=2:0.048  L=3:0.051  L=4:0.046  L=5:0.047  L=6:0.067  L=7:0.042  L=8:0.048  L=9:0.054  L=10:0.052  L=11:0.044  L=12:0.066
+   [Per-column chi-squared shifts] Candidate lengths tried (model score per char): L=5: -2.102, L=6: -1.101, L=9: -2.047, L=12: -1.101, L=15: -1.950, L=18: -1.101 | Smallest length within 0.03 of the best score: L=6. Each column's shift is the one with the lowest chi-squared; key letters: CIPHER
+   Accepted: vigenere.
+3. Conclusion
+   Vigenere key CIPHER (length 6) after language-model polish of each key letter.
+   Decrypt: Dorothy lived in the midst of the great Kansas prairies, with Uncle Henry, who was a farmer, and Aun...
+   Confidence: high (score -1.101)
+
+CIPHER: vigenere   KEY: CIPHER   SCORE: -1.101/char   ACCEPTED
+PLAINTEXT: Dorothy lived in the midst of the great Kansas prairies, with Uncle Henry, who was a farmer, and Aunt Em, who was the farmer's wife. Their house was small, for the lumber to build it had to be carried by wagon many miles. There were four walls, a floor and a roof, which made one room; and this room contained a rusty looking cookstove, a cupboard for the dishes, a table, three or four chairs, and the beds.
+
+

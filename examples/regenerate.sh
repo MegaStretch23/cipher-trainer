@@ -1,17 +1,22 @@
-#!/bin/sh
-# Rebuilds every file in this folder from the three plaintexts. Run from the repo root: sh examples/regenerate.sh
-set -e
-CT="python3 -m cipher_trainer"
+#!/usr/bin/env bash
+# Rebuilds every transcript in this folder from the public-domain samples in cipher_trainer/corpus.py.
+# Usage: cd <repo root> && bash examples/regenerate.sh
+set -euo pipefail
 cd "$(dirname "$0")/.."
-cd examples
-( cd ..
-  $CT encrypt caesar -k 11 -f examples/plain-1.txt > examples/caesar.ct.txt
-  $CT break auto -f examples/caesar.ct.txt --explain > examples/caesar-auto-explain.txt
-  $CT encrypt vigenere -k LEMON -f examples/plain-2.txt > examples/vigenere.ct.txt
-  $CT break vigenere -f examples/vigenere.ct.txt --explain > examples/vigenere-explain.txt
-  $CT encrypt substitution -k QWERTYUIOPASDFGHJKLZXCVBNM -f examples/plain-3.txt > examples/substitution.ct.txt
-  $CT break substitution -f examples/substitution.ct.txt --explain > examples/substitution-explain.txt
-  $CT encrypt columnar -k ZEBRAS -f examples/plain-1.txt > examples/columnar.ct.txt
-  $CT break columnar -f examples/columnar.ct.txt --explain > examples/columnar-explain.txt
-  $CT encrypt railfence -k 4 -f examples/plain-2.txt > examples/railfence.ct.txt
-  $CT break auto -f examples/railfence.ct.txt --explain > examples/railfence-auto-explain.txt )
+T="python3 -m cipher_trainer"
+sample() { python3 -c "from cipher_trainer.corpus import SAMPLES; print(SAMPLES['$1'])"; }
+run() {  # name sample cipher key
+  sample "$2" > "examples/plain-$2.txt"
+  $T encrypt -f "examples/plain-$2.txt" --cipher "$3" ${4:+--key "$4"} > "examples/$1.ciphertext.txt"
+  { echo "\$ trainer encrypt -f examples/plain-$2.txt --cipher $3 ${4:+--key $4}"; echo "\$ trainer solve -f examples/$1.ciphertext.txt"; echo; $T solve -f "examples/$1.ciphertext.txt" || true; } > "examples/$1.transcript.txt"
+}
+run caesar scandal caesar 11
+run vigenere oz vigenere CIPHER
+run railfence emma railfence 4
+run substitution treasure substitution QWERTYUIOPASDFGHJKLZXCVBNM
+run substitution-near-miss emma substitution QWERTYUIOPASDFGHJKLZXCVBNM
+python3 -c "
+import random, sys
+from cipher_trainer.stats import ALPHA
+g = random.Random(0); print(''.join(g.choice(ALPHA) for _ in range(150)))" > examples/random.ciphertext.txt
+{ echo "\$ trainer solve -f examples/random.ciphertext.txt   # 150 random letters, not a cipher"; echo; $T solve -f examples/random.ciphertext.txt || true; } > examples/random.transcript.txt

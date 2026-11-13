@@ -1,0 +1,22 @@
+$ trainer solve -f examples/random.ciphertext.txt   # 150 random letters, not a cipher
+
+1. Identify the cipher family
+   Letters: 150   IC: 0.0393   distance of letter frequencies from English (total variation): 0.41
+   IC is well below English: letter counts are flattened by mixing several alphabets -> polyalphabetic (Vigenere family).
+   Attack order: vigenere
+2. Attack: vigenere
+   model score -1.888 per char (English ~ -1.1, random ~ -2.7, accept at -1.45)
+   [Frequency analysis] 150 letters. Most common ciphertext letters: Z:  11 ( 7.3%); R:  10 ( 6.7%); C:  10 ( 6.7%); P:   9 ( 6.0%); T:   8 ( 5.3%); K:   8 ( 5.3%); J:   7 ( 4.7%); W:   7 ( 4.7%) | English is led by: E 12.7%, T 9.1%, A 8.2%, O 7.5%, I 7.0%, N 6.7%, S 6.3%, H 6.1%
+   [Index of coincidence] IC = 0.0393. English is about 0.0667, uniformly random letters 0.0385. A value between them means several Caesar alphabets are mixed: a polyalphabetic cipher such as Vigenere.
+   [Kasiski examination] No repeated 3-letter groups: the text is too short for Kasiski, relying on IC alone.
+   [Friedman estimate] L ~ 0.0273*n / ((n-1)*IC - 0.0385*n + 0.0658) = 28.4
+   [Average column IC per key length] If the key length is right, every column is a Caesar shift and its IC rises toward 0.0667: | L=1:0.039  L=2:0.037  L=3:0.034  L=4:0.039  L=5:0.034  L=6:0.033  L=7:0.033  L=8:0.035  L=9:0.036  L=10:0.036  L=11:0.030  L=12:0.035
+   [Per-column chi-squared shifts] Candidate lengths tried (model score per char): L=1: -2.298, L=2: -2.239, L=4: -2.210, L=9: -1.968, L=10: -2.078 | Smallest length within 0.03 of the best score: L=9. Each column's shift is the one with the lowest chi-squared; key letters: LWROOOPOE
+   Rejected: not English.
+3. Brute-force fallback
+   No attack reached the acceptance score. Ran every solver and kept the highest-scoring decrypt: substitution -1.717, vigenere -1.888, affine -2.168, caesar -2.298, columnar -2.334, atbash -2.391, railfence -2.419
+   Best guess: substitution, key RBQVZHXEJYNSOTCMUKDPGWLFIA. LOW CONFIDENCE (score -1.717): text may be too short or use an unsupported cipher.
+
+CIPHER: substitution   KEY: RBQVZHXEJYNSOTCMUKDPGWLFIA   SCORE: -1.717/char   LOW CONFIDENCE
+PLAINTEXT: PJKBYCTPEITWLUCHIHJSNEYAVENHISGODRTASWKRNQUATMCYBEAZOGPVEDQZNTRFGRVOULFFEHEAMOORCTSIAIVSARAUENALIMONEPRLFIXUXBNDYTOODJHHBOVADPVCYCEFUDLKLYMTDQVEWORNST
+

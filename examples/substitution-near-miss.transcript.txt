@@ -1,0 +1,38 @@
+$ trainer encrypt -f examples/plain-emma.txt --cipher substitution --key QWERTYUIOPASDFGHJKLZXCVBNM
+$ trainer solve -f examples/substitution-near-miss.ciphertext.txt
+
+1. Identify the cipher family
+   Letters: 341   IC: 0.0679   distance of letter frequencies from English (total variation): 0.45
+   IC is English-like but the frequencies are not: each plaintext letter always maps to the same ciphertext letter -> monoalphabetic substitution (Caesar, Atbash, affine or general substitution).
+   Attack order: caesar, atbash, affine, substitution
+2. Attack: caesar
+   model score -2.433 per char (English ~ -1.1, random ~ -2.7, accept at -1.45)
+   [Frequency analysis] 341 letters. Most common ciphertext letters: T:  51 (15.0%); G:  29 ( 8.5%); L:  29 ( 8.5%); Z:  28 ( 8.2%); Q:  23 ( 6.7%); F:  21 ( 6.2%); K:  21 ( 6.2%); O:  21 ( 6.2%) | English is led by: E 12.7%, T 9.1%, A 8.2%, O 7.5%, I 7.0%, N 6.7%, S 6.3%, H 6.1%
+   [Chi-squared scoring of all 26 shifts] For each shift, decrypt and measure the chi-squared distance of the letter counts from English (lower is better): | shift  4 -> chi2   1537.2   PZZMRCCNECTHPEMBNHCZPAOPYPGM... | shift  5 -> chi2   1580.4   OYYLQBBMDBSGODLAMGBYOZNOXOFL... | shift 25 -> chi2   1624.3   UEERWHHSJHYMUJRGSMHEUFTUDULR... | shift 19 -> chi2   1815.3   AKKXCNNYPNESAPXMYSNKALZAJARX... | Shift 4 is 1.0x better than the runner-up.
+   Rejected: not English.
+3. Attack: atbash
+   model score -2.087 per char (English ~ -1.1, random ~ -2.7, accept at -1.45)
+   [Atbash] Atbash has no key: A<->Z, B<->Y, ... Applying it once to the ciphertext gives: Gwwj Ettirtcog, rjuiotwg, vhgxgp, jui plvr, elar j vtwbtpajd...
+   Rejected: not English.
+4. Attack: affine
+   model score -1.935 per char (English ~ -1.1, random ~ -2.7, accept at -1.45)
+   [Frequency analysis] 341 letters. Most common ciphertext letters: T:  51 (15.0%); G:  29 ( 8.5%); L:  29 ( 8.5%); Z:  28 ( 8.2%); Q:  23 ( 6.7%); F:  21 ( 6.2%); K:  21 ( 6.2%); O:  21 ( 6.2%) | English is led by: E 12.7%, T 9.1%, A 8.2%, O 7.5%, I 7.0%, N 6.7%, S 6.3%, H 6.1%
+   [Affine key search] Affine is E(x) = a*x + b mod 26 with a coprime to 26 (12 choices) and b free (26), so only 312 keys exist. All were scored with the language model (log10 probability, higher is better): | a= 5 b=25 ->   -659.9   EGGTURROHRKSEHTWOSRGEBJELEXT... | a=17 b= 3 ->   -672.3   EAANYRRKLRSCELNUKCRAEXHEDEFN... | a= 7 b= 4 ->   -676.0   RLLYVEENIEZBRIYPNBELRACRWRMY... | a=19 b= 8 ->   -680.7   RXXKNEEVAEJHRAKTVHEXRIGRMRWK...
+   Rejected: not English.
+5. Attack: substitution
+   model score -1.021 per char (English ~ -1.1, random ~ -2.7, accept at -1.45)
+   [Frequency analysis] 341 letters. Most common ciphertext letters: T:  51 (15.0%); G:  29 ( 8.5%); L:  29 ( 8.5%); Z:  28 ( 8.2%); Q:  23 ( 6.7%); F:  21 ( 6.2%); K:  21 ( 6.2%); O:  21 ( 6.2%) | English is led by: E 12.7%, T 9.1%, A 8.2%, O 7.5%, I 7.0%, N 6.7%, S 6.3%, H 6.1%
+   [Index of coincidence] IC = 0.0679: close to English, but the letters are not the ones English uses most, so one fixed alphabet was swapped for another (monoalphabetic substitution).
+   [Initial guess by frequency rank] Rank the ciphertext letters by count and give them English's letters in order of frequency (E T A O I N S H R ...): | cipher ABCDEFGHIJKLMNOPQRSTUVWXYZ
+   plain  XKYLWNTBRJSAQMHZIDUEPFVGCO
+   [Hill-climbing on swaps] Swap two plaintext letters in the key; keep the swap if the quadgram-based log-probability of the decrypt rises; repeat until a full sweep changes nothing. | sweep 1: model score   -486.3   EHHAWIIDRIKTERANDTIHECUEVESANDSLCRWLORACIHFISOABUE... | sweep 2: model score   -472.4   EMMAWIIDRIGTERANDTIMEFUEVESANDSHFRWHORAFIMCISOABUE... | sweep 3: model score   -470.9   EMMAWIIDRIKTERANDTIMEFUEVESANDSHFRWHORAFIMCISOABUE... | sweep 4: model score   -470.9   EMMAWIIDRIKTERANDTIMEFUEVESANDSHFRWHORAFIMCISOABUE... | restart 1: shook the key with 4 random swaps, climbed again -> new best -467.6 | restart 2: shook the key with 5 random swaps, climbed again -> new best -348.2 | Kept the best of 13 climbs (12 restarts from perturbed keys).
+   Accepted: substitution.
+6. Conclusion
+   Substitution key (plain A..Z -> cipher): QWERTYUIOMBSDFGHJKLZXCVANP
+   Decrypt: Emma Woodhouse, handsome, clever, and rich, with a comfortable home and happy disposition, seemed to...
+   Confidence: high (score -1.021)
+
+CIPHER: substitution   KEY: QWERTYUIOMBSDFGHJKLZXCVANP   SCORE: -1.021/char   ACCEPTED
+PLAINTEXT: Emma Woodhouse, handsome, clever, and rich, with a comfortable home and happy disposition, seemed to unite some of the best blessings of ekistence; and had lived nearly twenty-one years in the world with very little to distress or vek her. She was the youngest of the two daughters of a most affectionate, indulgent father; and had, in consequence of her sister's marriage, been mistress of his house from a very early period.
+
+

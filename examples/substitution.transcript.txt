@@ -1,0 +1,38 @@
+$ trainer encrypt -f examples/plain-treasure.txt --cipher substitution --key QWERTYUIOPASDFGHJKLZXCVBNM
+$ trainer solve -f examples/substitution.ciphertext.txt
+
+1. Identify the cipher family
+   Letters: 411   IC: 0.0668   distance of letter frequencies from English (total variation): 0.44
+   IC is English-like but the frequencies are not: each plaintext letter always maps to the same ciphertext letter -> monoalphabetic substitution (Caesar, Atbash, affine or general substitution).
+   Attack order: caesar, atbash, affine, substitution
+2. Attack: caesar
+   model score -2.144 per char (English ~ -1.1, random ~ -2.7, accept at -1.45)
+   [Frequency analysis] 411 letters. Most common ciphertext letters: T:  59 (14.4%); Z:  43 (10.5%); F:  36 ( 8.8%); Q:  29 ( 7.1%); O:  26 ( 6.3%); K:  25 ( 6.1%); G:  24 ( 5.8%); I:  23 ( 5.6%) | English is led by: E 12.7%, T 9.1%, A 8.2%, O 7.5%, I 7.0%, N 6.7%, S 6.3%, H 6.1%
+   [Chi-squared scoring of all 26 shifts] For each shift, decrypt and measure the chi-squared distance of the letter counts from English (lower is better): | shift  5 -> chi2   1666.7   GESJFOUFONLQAOIMFNJXOGOILAMU... | shift 14 -> chi2   1675.4   XVJAWFLWFECHRFZDWEAOFXFZCRDL... | shift 12 -> chi2   1676.9   ZXLCYHNYHGEJTHBFYGCQHZHBETFN... | shift 25 -> chi2   1793.3   MKYPLUALUTRWGUOSLTPDUMUORGSA... | Shift 5 is 1.0x better than the runner-up.
+   Rejected: not English.
+3. Attack: atbash
+   model score -2.162 per char (English ~ -1.1, random ~ -2.7, accept at -1.45)
+   [Atbash] Atbash has no key: A<->Z, B<->Y, ... Applying it once to the ciphertext gives: Oqclpg Apghjeugm, Ip. Hlxgogm, jui arg pgoa tb argog fguahgw...
+   Rejected: not English.
+4. Attack: affine
+   model score -2.022 per char (English ~ -1.1, random ~ -2.7, accept at -1.45)
+   [Frequency analysis] 411 letters. Most common ciphertext letters: T:  59 (14.4%); Z:  43 (10.5%); F:  36 ( 8.8%); Q:  29 ( 7.1%); O:  26 ( 6.3%); K:  25 ( 6.1%); G:  24 ( 5.8%); I:  23 ( 5.6%) | English is led by: E 12.7%, T 9.1%, A 8.2%, O 7.5%, I 7.0%, N 6.7%, S 6.3%, H 6.1%
+   [Affine key search] Affine is E(x) = a*x + b mod 26 with a coprime to 26 (12 choices) and b free (26), so only 312 keys exist. All were scored with the language model (log10 probability, higher is better): | a= 7 b= 4 ->   -831.2   BXZUMRDMRCYVPRFNMCUWRBRFYPND... | a= 7 b=22 ->   -834.2   RNPKCHTCHSOLFHVDCSKMHRHVOFDT... | a=11 b=18 ->   -840.3   XLRCETDETAOFNTJHEACITXTJONHD... | a=19 b=20 ->   -842.7   FJHMUPDUPEILRPBTUEMKPFPBIRTD...
+   Rejected: not English.
+5. Attack: substitution
+   model score -1.056 per char (English ~ -1.1, random ~ -2.7, accept at -1.45)
+   [Frequency analysis] 411 letters. Most common ciphertext letters: T:  59 (14.4%); Z:  43 (10.5%); F:  36 ( 8.8%); Q:  29 ( 7.1%); O:  26 ( 6.3%); K:  25 ( 6.1%); G:  24 ( 5.8%); I:  23 ( 5.6%) | English is led by: E 12.7%, T 9.1%, A 8.2%, O 7.5%, I 7.0%, N 6.7%, S 6.3%, H 6.1%
+   [Index of coincidence] IC = 0.0668: close to English, but the letters are not the ones English uses most, so one fixed alphabet was swapped for another (monoalphabetic substitution).
+   [Initial guess by frequency rank] Rank the ciphertext letters by count and give them English's letters in order of frequency (E T A O I N S H R ...): | cipher ABCDEFGHIJKLMNOPQRSTUVWXYZ
+   plain  PXKFBASVHJNRQGIZODLEUYMCWT
+   [Hill-climbing on swaps] Swap two plaintext letters in the key; keep the swap if the quadgram-based log-probability of the decrypt rises; repeat until a full sweep changes nothing. | sweep 1: model score   -496.6   SXUIRETRELAMNEPDRLIVESEPANDTHERESTOCTHESEGENTLEFEN... | sweep 2: model score   -464.4   SQUIRETRELAWNEYDRLIVESEYANDTHERESTOFTHESEGENTLECEN... | sweep 3: model score   -434.1   SQUIRETRELAWNEYDRLIVESEYANDTHERESTOFTHESEGENTLEMEN... | sweep 4: model score   -434.1   SQUIRETRELAWNEYDRLIVESEYANDTHERESTOFTHESEGENTLEMEN... | Kept the best of 13 climbs (12 restarts from perturbed keys).
+   Accepted: substitution.
+6. Conclusion
+   Substitution key (plain A..Z -> cipher): QWERTYUIOMASDFGHJKLZXCVBNP
+   Decrypt: Squire Trelawney, Dr. Livesey, and the rest of these gentlemen having asked me to write down the who...
+   Confidence: high (score -1.056)
+
+CIPHER: substitution   KEY: QWERTYUIOMASDFGHJKLZXCVBNP   SCORE: -1.056/char   ACCEPTED
+PLAINTEXT: Squire Trelawney, Dr. Livesey, and the rest of these gentlemen having asked me to write down the whole particulars about Treasure Island, from the beginning to the end, keeping nothing back but the bearings of the island, and that only because there is still treasure not yet lifted, I take up my pen in the year of grace seventeen hundred and fifty something, and go back to the time when my father kept the Admiral Benbow inn and the brown old seaman with the sabre cut first took up his lodging under our roof.
+
+

@@ -1,0 +1,21 @@
+$ trainer encrypt -f examples/plain-scandal.txt --cipher caesar --key 11
+$ trainer solve -f examples/caesar.ciphertext.txt
+
+1. Identify the cipher family
+   Letters: 393   IC: 0.0687   distance of letter frequencies from English (total variation): 0.46
+   IC is English-like but the frequencies are not: each plaintext letter always maps to the same ciphertext letter -> monoalphabetic substitution (Caesar, Atbash, affine or general substitution).
+   Attack order: caesar, atbash, affine, substitution
+2. Attack: caesar
+   model score -1.056 per char (English ~ -1.1, random ~ -2.7, accept at -1.45)
+   [Frequency analysis] 393 letters. Most common ciphertext letters: P:  55 (14.0%); L:  37 ( 9.4%); E:  30 ( 7.6%); Z:  30 ( 7.6%); S:  28 ( 7.1%); Y:  28 ( 7.1%); D:  27 ( 6.9%); T:  27 ( 6.9%) | English is led by: E 12.7%, T 9.1%, A 8.2%, O 7.5%, I 7.0%, N 6.7%, S 6.3%, H 6.1%
+   [Chi-squared scoring of all 26 shifts] For each shift, decrypt and measure the chi-squared distance of the letter counts from English (lower is better): | shift 11 -> chi2     19.3   TOSHERLOCKHOLMESSHEISALWAYST... | shift 17 -> chi2   1393.3   NIMBYLFIWEBIFGYMMBYCMUFQUSMN... | shift 22 -> chi2   1692.8   IDHWTGADRZWDABTHHWTXHPALPNHI... | shift 24 -> chi2   1916.9   GBFUREYBPXUBYZRFFURVFNYJNLFG... | Shift 11 is 72.3x better than the runner-up.
+   Accepted: caesar.
+3. Conclusion
+   Caesar shift 11 (each letter moved 11 places forward by the encryptor; key letter L).
+   Decrypt: To Sherlock Holmes she is always the woman. I have seldom heard him mention her under any other name...
+   Confidence: high (score -1.056)
+
+CIPHER: caesar   KEY: 11   SCORE: -1.056/char   ACCEPTED
+PLAINTEXT: To Sherlock Holmes she is always the woman. I have seldom heard him mention her under any other name. In his eyes she eclipses and predominates the whole of her sex. It was not that he felt any emotion akin to love for Irene Adler. All emotions, and that one particularly, were abhorrent to his cold, precise but admirably balanced mind. He was, I take it, the most perfect reasoning and observing machine that the world has seen, but as a lover he would have placed himself in a false position.
+
+
