@@ -1,0 +1,28 @@
+Simple substitution: one fixed mapping of the 26 letters (26! keys, too many to try), so we climb: start from a guess, swap two letters, keep the swap if the English score rises.
+letter frequencies (217 letters), top 8 vs English:
+  T    32   14.7%  #############################   (English T: 9.1%)
+  G    22   10.1%  ####################   (English G: 2.0%)
+  Z    19    8.8%  ##################   (English Z: 0.1%)
+  I    17    7.8%  ################   (English I: 7.0%)
+  L    15    6.9%  ##############   (English L: 4.0%)
+  O    14    6.5%  #############   (English O: 7.5%)
+  K    14    6.5%  #############   (English K: 0.8%)
+  F    13    6.0%  ############   (English F: 2.2%)
+step 1  rank ciphertext letters by frequency and line them up with English order ETAOINSHRDLCUMWFGYPBVKJXQZ:
+        T->E G->T Z->A I->O L->I O->N K->S F->H R->R X->D
+        score of that first guess: -3.606   NUGTDLSESELRNHFAONIAOEHGTDOLYEUTDHRAOEHT
+step 2  hill climb with a cooling schedule: propose a swap of two table entries, keep it if the trigram score rises, and keep a worse one with probability exp(drop/T) while T cools (escapes dead ends); 6 restarts (seed 1; the first starts from the frequency guess, the others from shuffles), each finished by plain greedy swaps
+        restart 1: score -2.125  IFYOUAREREADINGTHISTHENYOUHAVEFOUNDTHENO
+        restart 2: score -2.134  IFCOUAREREADINGTHISTHENCOUHAVEFOUNDTHENO
+        restart 3: score -2.134  IFCOUAREREADINGTHISTHENCOUHAVEFOUNDTHENO
+        restart 4: score -2.544  IFYOUAREREADINGSTIMSTENYOUTAVEFOUNDSTENO
+        restart 5: score -2.870  OCKEYILALAITOSUNDOWNDASKEYDIBACEYSTNDASE
+        restart 6: score -2.128  IFYOUAREREADINGTHISTHENYOUHAVEFOUNDTHENO
+step 3  best score -2.125; plaintext letter for each cipher letter A..Z: KJVMCNOPHXRSZYIQADLEGWBUFT
+key (plain A..Z -> cipher letters) = QWERTYUIOBASDFGHPKLZXCVJNM
+
+cipher:    substitution
+key:       QWERTYUIOBASDFGHPKLZXCVJNM
+score:     -1.627  (reads as English)
+plaintext: If you are reading this then you have found the notebook behind the loose stone in the cellar. The map shows where the silver is buried, but do not dig before the first frost, because the ground near the old well is soft and the neighbors would see you from their windows.
+

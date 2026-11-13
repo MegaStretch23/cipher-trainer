@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cipher-trainer"
+version = "0.1.0"
+description = "Break classical ciphers (Caesar, Atbash, Vigenere, substitution, rail fence, columnar) and see every step: frequencies, index of coincidence, Kasiski, chi-squared, hill climbing"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = []
+
+[project.scripts]
+cipher-trainer = "cipher_trainer.cli:main"
+
+[tool.setuptools]
+packages = ["cipher_trainer"]

@@ -1,0 +1,46 @@
+AUTO: diagnose first, then run every solver and keep the most English-looking result.
+input: 198 letters
+letter frequencies (198 letters), top 8 vs English:
+  P    34   17.2%  ##################################   (English P: 1.9%)
+  E    24   12.1%  ########################   (English E: 12.7%)
+  S    16    8.1%  ################   (English S: 6.3%)
+  L    15    7.6%  ###############   (English L: 4.0%)
+  Z    14    7.1%  ##############   (English Z: 0.1%)
+  C    14    7.1%  ##############   (English C: 2.8%)
+  W    11    5.6%  ###########   (English W: 2.4%)
+  Y     9    4.5%  #########   (English Y: 2.0%)
+index of coincidence = 0.0757  (English ~0.0667, random letters ~0.0385)
+chi-squared of letter counts vs English = 1690.0  (about 25-60 = English-like letter counts for a few hundred letters; hundreds = not)
+high IC: one fixed letter mapping (Caesar / Atbash / simple substitution) or a transposition (rail fence / columnar)
+  -> if chi-squared is also LOW the letters are English letters in a new ORDER (transposition); if chi-squared is high they were REPLACED (substitution)
+Kasiski: 15 repeated 3-letter distances; examples ESP at distance 31, ESP at distance 35, ESP at distance 6, ESP at distance 18, ESP at distance 45
+Kasiski factor votes (key length: votes): 3: 7, 5: 5, 2: 4, 9: 3, 15: 3
+trying every cipher; final score = trigram log-probability + small common-word bonus (higher is better):
+  caesar       score -2.041  key 11  THELIGHTHOUSEKEEPERSENTWORDTHATTHESU
+  atbash       score -5.183  key None  VHKDGIHVHAUWKEKKZKXWKBVSAXLVHOVVHKWU
+  vigenere     score -2.041  key L  THELIGHTHOUSEKEEPERSENTWORDTHATTHESU
+  substitution score -2.046  key LMNOPHRSTBVWQYZAUCDEFGXIJK  THELIGHTHOUSEKEEPERSENTFORDTHATTHESU
+  railfence    score -4.299  key 7  EPCLOCEEQDCCSDTPZZSWCEGPPYPPEPPLHWZE
+  columnar     score -4.014  key 10,3,1,5,8,7,9,6,2,4  JSDYPSAOCEMPPEDLCAESZYYTOCPWHPLZEWLM
+winner: caesar (reads as English)
+
+--- the winning solver's own steps ---
+Caesar: every letter moved by the same shift k (0-25). There are only 26 keys, so we test all of them with chi-squared.
+letter frequencies (198 letters), top 5 vs English:
+  P    34   17.2%  ##################################   (English P: 1.9%)
+  E    24   12.1%  ########################   (English E: 12.7%)
+  S    16    8.1%  ################   (English S: 6.3%)
+  L    15    7.6%  ###############   (English L: 4.0%)
+  Z    14    7.1%  ##############   (English Z: 0.1%)
+for each shift k we decrypt and compute chi-squared against English letter frequencies (lower = better):
+  shift 11  chi2     31.2  THELIGHTHOUSEKEEPERSENTWORDTHATTHESUPPLY
+  shift 22  chi2    597.5  IWTAXVWIWDJHTZTTETGHTCILDGSIWPIIWTHJEEAN
+  shift  4  chi2    741.5  AOLSPNOAOVBZLRLLWLYZLUADVYKAOHAAOLZBWWSF
+  shift 10  chi2    765.1  UIFMJHIUIPVTFLFFQFSTFOUXPSEUIBUUIFTVQQMZ
+best shift = 11 (letter L), the runner-up chi2 is 597.5, so the margin is 19.1x
+
+cipher:    caesar
+key:       11
+score:     -2.041  (reads as English)
+plaintext: The lighthouse keeper sent word that the supply boat would arrive on Tuesday if the weather held. Please tell the cook to prepare enough bread for twelve men, and ask the harbor master to leave the north gate unlocked until the tide has turned.
+
