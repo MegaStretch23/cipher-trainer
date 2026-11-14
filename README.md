@@ -184,3 +184,7 @@ The tests cover known cipher vectors, round trips, every solver on a generated c
 I also run pay-per-event data tools on Apify, for example the [SEC Form 4 insider cluster scanner](https://apify.com/johnveds15/sec-form4-insider-clusters). They are unrelated to ciphers; there is no paid version of cipher-trainer.
 
 MIT licensed.
+
+## Merged from classical-cipher-trainer
+
+`classical-cipher-trainer` was the same idea built twice. Its own files are kept in [`merged/classical-cipher-trainer/`](merged/classical-cipher-trainer/) (unique parts: see that folder's README and tests); the old repo now points here: https://github.com/MegaStretch23/classical-cipher-trainer

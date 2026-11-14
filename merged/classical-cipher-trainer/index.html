@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Classical Cipher Trainer: break Caesar, Vigenere, substitution and columnar ciphers step by step (in your browser)</title>
+<meta name="description" content="Paste a ciphertext and watch it get broken: Caesar, Atbash, Vigenere (Kasiski and index of coincidence, then chi-squared per column), simple substitution (hill climb with English quadgrams) and columnar transposition. Every step is printed. Runs in your browser; nothing is sent anywhere.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+<h1>Classical Cipher Trainer</h1>
+<p class="lead">Paste a ciphertext, pick a cipher (or <b>auto</b>) and read the cryptanalysis as it happens: letter-frequency tables, the Vigenere key-length guess from Kasiski distances and the index of coincidence, chi-squared scores for each shift, and the quadgram score of every hill-climb restart. Use it to learn how these ciphers fall, or to check a puzzle.</p>
+<p class="priv"><b>Private by construction.</b> Everything runs in this page. The page code makes no network calls and the text you paste never leaves your browser tab. Breaking is statistical: a short ciphertext can come out wrong, and the trace shows the scores so you can judge the result.</p>
+</header>
+<main>
+<section class="box" aria-labelledby="h-break">
+<h2 id="h-break">1. Break a ciphertext</h2>
+<label class="grow">Ciphertext (only the letters A-Z are used)<textarea id="ct" rows="6" spellcheck="false" placeholder="Paste a ciphertext here, or press Load example"></textarea></label>
+<div class="row"><label>Cipher <select id="cipher"><option value="auto">auto (try them)</option><option value="caesar">Caesar</option><option value="atbash">Atbash</option><option value="vigenere">Vigenere</option><option value="substitution">Simple substitution</option><option value="columnar">Columnar transposition</option></select></label>
+<label>Longest Vigenere key <input id="maxlen" type="number" min="2" max="30" value="16" size="3"></label>
+<label>Widest columnar key <input id="maxwidth" type="number" min="2" max="10" value="8" size="3"></label>
+<button id="go" type="button">Break it</button><button id="example" type="button">Load example</button></div>
+<p id="status" class="msg" role="status"></p>
+<div id="out" hidden>
+<p class="mono" id="result"></p>
+<div class="trace" id="trace" aria-label="Step-by-step trace"></div>
+<p class="hint">Substitution and columnar searches can take a few seconds on a long text.</p>
+</div>
+</section>
+<section class="box" aria-labelledby="h-enc">
+<h2 id="h-enc">2. Make a practice ciphertext</h2>
+<div class="row"><label class="grow">Plaintext<input id="pt" type="text" value="Meet me by the old stone bridge at nine"></label>
+<label>Cipher <select id="ecipher"><option value="caesar">Caesar (key: a number)</option><option value="atbash">Atbash (no key)</option><option value="vigenere">Vigenere (key: a word)</option><option value="substitution">Substitution (key: 26 letters)</option><option value="columnar">Columnar (key: a word)</option></select></label>
+<label>Key <input id="ekey" type="text" value="3" size="28"></label><button id="enc" type="button">Encrypt</button></div>
+<p id="encout" class="mono"></p>
+</section>
+<section class="box" aria-labelledby="h-how">
+<h2 id="h-how">What each break does</h2>
+<ul>
+<li><b>Caesar</b>: try all 26 shifts and keep the one whose letter counts are closest to English (chi-squared).</li>
+<li><b>Atbash</b>: no key; the alphabet is reversed.</li>
+<li><b>Vigenere</b>: Kasiski (repeated trigram distances) and the index of coincidence for each key length pick the length; then each column is a Caesar shift, solved by chi-squared.</li>
+<li><b>Simple substitution</b>: start from frequency ranks, then hill-climb: swap two letters of the key, keep it if the English quadgram score rises, restart from the best key a few times.</li>
+<li><b>Columnar transposition</b>: for each width, search the column order with the same quadgram score; the highest-scoring width wins.</li>
+</ul>
+<p class="hint">English statistics come from public-domain Project Gutenberg texts. The same code ships as a stdlib Python CLI, <a href="cipher_trainer.py">cipher_trainer.py</a> (with <a href="data.json">data.json</a>): <code>python3 -I cipher_trainer.py break auto -f message.txt</code>. Not covered: ciphers with spaces or punctuation kept in the key, nulls, digraph and machine ciphers, and non-English text.</p>
+</section>
+</main>
+<footer><p>Free, MIT licensed. Source: this Space's files. No account, no tracking.</p></footer>
+<script src="data.js"></script>
+<script src="core.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
